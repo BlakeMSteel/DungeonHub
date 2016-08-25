@@ -1,0 +1,68 @@
+﻿@model DungeonHub.ViewModels.SessionsViewModel
+@{
+    ViewBag.Title = "Home Page";
+}
+
+<h1>@Model.Heading</h1>
+<ul class="sessions voffset4">
+    @foreach (var session in Model.UpcomingSessions)
+    {
+        <li>
+            <div class="date">
+                <div class="month">
+                    @session.DateTime.ToString("MMM")
+                </div>
+                <div class="day">
+                    @session.DateTime.ToString("d ")
+                </div>
+            </div>
+            <div class="details">
+                <span class="gm">
+                    @session.GM.Name
+                    
+                    @if (Model.ShowActions)
+                    {
+                        <button class="btn btn-link btn-sm js-toggle-follow" data-user-id="@session.GMId">Follow</button>
+                    }
+                </span>
+                <span class="gameSystem">
+                    @session.GameSystem.Name
+                </span>
+                @if (Model.ShowActions)
+                {
+                    <button data-session-id="@session.Id" class="btn btn-default btn-sm pull-right js-toggle-attendance">Playing?</button>
+                }
+            </div>
+        </li>
+    }
+</ul>
+
+@section scripts {
+    <script>
+        $(document)
+            .ready(function() {
+                $(".js-toggle-attendance")
+                    .click(function (e) {
+                        var button = $(e.target);
+                        $.post("/api/players", { sessionId: button.attr("data-session-id") })
+                            .done(function() {
+                                button.removeClass("btn-default").addClass("btn.info").text("Playing");
+                            })
+                            .fail(function () {
+                                alert("Something failed");
+                            });
+                    });
+                $(".js-toggle-follow")
+                    .click(function (e) {
+                        var button = $(e.target);
+                        $.post("/api/followings", { followeeId: button.attr("data-user-id") })
+                            .done(function () {
+                                button.text("Following");
+                            })
+                            .fail(function () {
+                                alert("Something failed");
+                            });
+                    });
+            });
+    </script>
+}
